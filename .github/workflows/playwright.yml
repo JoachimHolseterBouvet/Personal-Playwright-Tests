@@ -3,14 +3,18 @@ name: Playwright Coffee Cart Tests
 on:
   push:
     branches: [ main, master ]
+    paths:
+      - 'tests/**'
   pull_request:
     branches: [ main, master ]
+    paths:
+      - 'tests/**'
 
 jobs:
   playwright-coffee-cart-e2e:
     name: Playwright Coffee Cart E2E
-    timeout-minutes: 60
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
