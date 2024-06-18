@@ -23,6 +23,7 @@ test("The header buttons work", async ({ page }) => {
 
 test("Check that there is content visible", async ({ page }) => {
   // Select the list items
+  await page.waitForLoadState('networkidle');
   const listItems = page.locator("ul[data-v-a9662a08] li");
 
   // Get the count of list items
@@ -75,6 +76,7 @@ test.describe.configure({ mode: 'parallel' });
 
 test('Randomly adds coffees to the cart and goes through checkout', async ({ page }) => {
   let flipFlop = true;
+  await page.waitForLoadState('networkidle');
 
   for (let i = 0; i < 10; i++) {
     const cups = await page.locator('.cup').elementHandles();
@@ -154,7 +156,7 @@ test('Randomly adds coffees to the cart and goes through checkout', async ({ pag
   await page.locator('[aria-label="Proceed to checkout"]').click();
   await page.locator('input[id="name"]').fill('John Doe');
   await page.locator('input[id="email"]').fill('john@aol.com');
-  await page.locator('[aria-label="Promotion checkbox"]').click();
+  await page.locator('input[id="promotion"]').click({ force: true });
   await page.locator('button[id="submit-payment"]').click();
   await expect(page.locator('div[class="snackbar success"]')).toBeVisible();
 });
