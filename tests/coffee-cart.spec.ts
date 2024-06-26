@@ -23,7 +23,7 @@ test("The header buttons work", async ({ page }) => {
 
 test("Check that there is content visible", async ({ page }) => {
   // Select the list items
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState("networkidle");
   const listItems = page.locator("ul[data-v-a9662a08] li");
 
   // Get the count of list items
@@ -31,6 +31,7 @@ test("Check that there is content visible", async ({ page }) => {
 
   // Assert that the count is 9
   expect(count).toBe(9);
+  // Kul kommentar
 });
 
 test("Loop through each coffee item and check the name and price", async ({
@@ -72,18 +73,20 @@ test("Loop through each coffee item and check the name and price", async ({
   console.log(`All ${itemCount} items have been checked`);
 });
 
-test.describe.configure({ mode: 'parallel' });
+test.describe.configure({ mode: "parallel" });
 
-test('Randomly adds coffees to the cart and goes through checkout', async ({ page }) => {
+test("Randomly adds coffees to the cart and goes through checkout", async ({
+  page,
+}) => {
   let flipFlop = true;
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState("networkidle");
 
   for (let i = 0; i < 10; i++) {
-    const cups = await page.locator('.cup').elementHandles();
+    const cups = await page.locator(".cup").elementHandles();
     const itemCount = cups.length;
 
     if (itemCount === 0) {
-      throw new Error('No cups found on the page');
+      throw new Error("No cups found on the page");
     }
 
     const randomIndex = Math.floor(Math.random() * itemCount);
@@ -95,13 +98,13 @@ test('Randomly adds coffees to the cart and goes through checkout', async ({ pag
       throw new Error(`Cup at index ${randomIndex} not found`);
     }
 
-    const promoExists = await page.locator('.promo').count();
+    const promoExists = await page.locator(".promo").count();
     if (promoExists > 0) {
       if (flipFlop) {
-        await page.locator('.promo .buttons .yes').click();
+        await page.locator(".promo .buttons .yes").click();
         console.log('Clicked "Yes, of course!" button');
       } else {
-        await page.locator('button').nth(1).click();
+        await page.locator("button").nth(1).click();
         console.log('Clicked "Nah, I\'ll skip." button');
       }
       flipFlop = !flipFlop;
@@ -115,47 +118,73 @@ test('Randomly adds coffees to the cart and goes through checkout', async ({ pag
 
   // Check the total price based on item count
   if (itemCount > 0) {
-    await expect(page.locator('button[data-test="checkout"]')).not.toHaveText('Total: $0.00');
+    await expect(page.locator('button[data-test="checkout"]')).not.toHaveText(
+      "Total: $0.00"
+    );
   } else {
-    await expect(page.locator('button[data-test="checkout"]')).toHaveText('Total: $0.00');
+    await expect(page.locator('button[data-test="checkout"]')).toHaveText(
+      "Total: $0.00"
+    );
   }
 
   await page.locator('[aria-label="Cart page"]').click();
 
-  let previousTotal = await page.locator('button[data-test="checkout"]').innerText();
+  let previousTotal = await page
+    .locator('button[data-test="checkout"]')
+    .innerText();
 
   // Function to add, remove, and delete items and check the total
-  const checkAndChangeTotal = async (actionSelector: string, actionDescription: string) => {
-    const items = await page.locator('.list>div>ul .list-item');
+  const checkAndChangeTotal = async (
+    actionSelector: string,
+    actionDescription: string
+  ) => {
+    const items = await page.locator(".list>div>ul .list-item");
     const itemCount = await items.count();
 
     if (itemCount === 0) {
-      throw new Error('No items found in the list');
+      throw new Error("No items found in the list");
     }
 
     const randomItemsIndex = Math.floor(Math.random() * itemCount);
 
-    if (await items.nth(randomItemsIndex).locator(actionSelector).count() > 0) {
-      await items.nth(randomItemsIndex).locator(actionSelector).click({ force: true });
+    if (
+      (await items.nth(randomItemsIndex).locator(actionSelector).count()) > 0
+    ) {
+      await items
+        .nth(randomItemsIndex)
+        .locator(actionSelector)
+        .click({ force: true });
 
       // Verify the total has changed
-      const newTotal = await page.locator('button[data-test="checkout"]').innerText();
+      const newTotal = await page
+        .locator('button[data-test="checkout"]')
+        .innerText();
       expect(newTotal).not.toBe(previousTotal);
       previousTotal = newTotal;
-      console.log(`${actionDescription} was successful. New total is ${newTotal}`);
+      console.log(
+        `${actionDescription} was successful. New total is ${newTotal}`
+      );
     } else {
-      throw new Error(`Action selector '${actionSelector}' not found for item at index ${randomItemsIndex}`);
+      throw new Error(
+        `Action selector '${actionSelector}' not found for item at index ${randomItemsIndex}`
+      );
     }
   };
 
   await checkAndChangeTotal('button[aria-label*="Add one"]', "Adding one item");
-  await checkAndChangeTotal('button[aria-label*="Remove one"]', "Removing one item");
-  await checkAndChangeTotal('button[aria-label*="Remove all"]', "Deleting item");
+  await checkAndChangeTotal(
+    'button[aria-label*="Remove one"]',
+    "Removing one item"
+  );
+  await checkAndChangeTotal(
+    'button[aria-label*="Remove all"]',
+    "Deleting item"
+  );
 
   // Proceed to checkout
   await page.locator('[aria-label="Proceed to checkout"]').click();
-  await page.locator('input[id="name"]').fill('John Doe');
-  await page.locator('input[id="email"]').fill('john@aol.com');
+  await page.locator('input[id="name"]').fill("John Doe");
+  await page.locator('input[id="email"]').fill("john@aol.com");
   await page.locator('input[id="promotion"]').click({ force: true });
   await page.locator('button[id="submit-payment"]').click();
   await expect(page.locator('div[class="snackbar success"]')).toBeVisible();
